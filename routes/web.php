@@ -19,7 +19,7 @@ Route::get('/', function () {
 
 Route::group(['prefix' => 'level1'], function () {
     Route::get('/', 'SchoolController@index');
-//    Route::get('gen', 'SchoolController@index');
+    Route::get('show/{sub_id?}', 'SchoolController@show');
     Route::post('submit', 'SchoolController@submit');
     Route::get('success', 'SchoolController@success');
 });

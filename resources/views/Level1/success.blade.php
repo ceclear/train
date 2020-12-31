@@ -54,6 +54,10 @@
     @if($data['code']==1)
         <a href="javascript:history.go(-1)" style="color:red">返回</a>
     @endif
+    @if($data['code']==0&&$data['sub_id'])
+        <a href="{{url('level1/show',['sub_id'=>$data['sub_id']])}}" style="color:red">查看成绩</a>
+    @endif
+
 </div>
 
 

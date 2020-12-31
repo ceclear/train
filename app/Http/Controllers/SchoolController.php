@@ -11,6 +11,7 @@ namespace App\Http\Controllers;
 
 use App\Models\SubtractDetail;
 use Illuminate\Support\Facades\DB;
+use function PHPUnit\Framework\isEmpty;
 
 class SchoolController extends Controller
 {
@@ -22,7 +23,6 @@ class SchoolController extends Controller
         $every = 10;
         $count = request('count', 20);
         $arr = [];
-        $cssDiv = "height:60px;line-height:60px;font-weight:bold;width: 260px;border-right:1px solid #ccc;float: left;padding-left: 10px;font-size:36px";
         do {
             $first = rand(1, $max);
             $second = rand(1, $max);
@@ -32,10 +32,11 @@ class SchoolController extends Controller
             $six = rand($five, $max);
             $rel1 = $first + $second - $third;
             $rel2 = $five - $four + $six;
-            $str1 = $first . "+" . $second . "-" . $third . '=';
-            $str2 = $five . "-" . $four . "+" . $six . '=';
+            $strVal1 = $first + $second - $third;
+            $strVal2 = $five - $four + $six;
+            $str1 = $first . "+" . $second . "-" . $third . '=' . $strVal1;
+            $str2 = $five . "-" . $four . "+" . $six . '=' . $strVal2;
             if (($rel1 >= 0 && ($first + $second) <= $max) && !in_array($str1, $arr) && count($arr) < $count) {
-
                 $arr[] = $str1;
                 $num++;
             }
@@ -48,43 +49,60 @@ class SchoolController extends Controller
         } while ($num < $count);
         shuffle($arr);
         for ($i = 0; $i < $every; $i++) {
-            $list[$i][] = $arr[$i * 2];
-            $list[$i][] = $arr[$i * 2 + 1];
+            $a = explode('=', $arr[$i * 2]);
+            $b = explode('=', $arr[$i * 2 + 1]);
+            $list[$i][] = ['key_str' => $a[0], 'val' => $a[1]];
+            $list[$i][] = ['key_str' => $b[0], 'val' => $b[1]];
         }
+//        dd($list);
         return view('Level1.index', compact("list"));
     }
 
     public function show()
     {
+        $subId = request('sub_id');
         $num = 10;
-        $list = SubtractDetail::all()->toArray();
-        for ($i = 0; $i < $num; $i++) {
-            $arr[$i][] = $list[$i * 2];
-            $arr[$i][] = $list[$i * 2 + 1];
+        $list = SubtractDetail::where('sub_id', $subId)->get()->toArray();
+        $arr = [];
+        if ($list) {
+            for ($i = 0; $i < $num; $i++) {
+                $arr[$i][] = $list[$i * 2];
+                $arr[$i][] = $list[$i * 2 + 1];
+            }
         }
-        return view('Level1.index', compact("arr"));
+        return view('Level1.show', compact("arr"));
     }
 
     public function submit()
     {
         $param = request()->post();
+
         unset($param['_token']);
-        $model = new SubtractDetail();
         DB::beginTransaction();
         $flag = true;
+        $msg = "-_- 好棒,你做完了今天的作业,点击下方查看成绩";
+        $insert = [];
+        $maxSub = SubtractDetail::max('sub_id');
+        $subId = $maxSub ? $maxSub + 1 : 1;
+        $keyArr = [];
         foreach ($param as $key => $item) {
-            if (empty($item)) {
+            $kk = explode('_', $key)[1];
+            if (in_array($kk, $keyArr)) {
+                $insert[] = ['sub_id' => $subId, 'key_str' => $kk, 'val' => $param['hi_' . $kk], 'enter_val' => $param['val_' . $kk], 'created_at' => time()];
+            }
+            $keyArr[] = $kk;
+            if ($item == '') {
                 $flag = false;
+                $msg = "你有作业没有做完哦,点击下方继续做完";
                 break;
             }
-            $arr = explode('_', $key);
-            $id = $arr[1];
-            $model->where('id', $id)->update(['enter_val' => $item]);
         }
-        $data['msg'] = "-_- 好棒,你做完了今天的作业";
+        SubtractDetail::insert($insert);
+        $data['msg'] = $msg;
         $data['code'] = 0;
+        $data['sub_id'] = $subId;
         if (!$flag) {
-            $data['msg'] = "你有作业没有做完哦,点击下方继续做完";
+            $data['msg'] = $msg;
             $data['code'] = 1;
             DB::rollBack();
             return redirect('level1/success')->with($data);
@@ -95,13 +113,7 @@ class SchoolController extends Controller
 
     public function success()
     {
-        $data = ['msg' => session('msg'), 'code' => session('code')];
+        $data = ['msg' => session('msg'), 'code' => session('code'), 'sub_id' => session('sub_id')];
         return view('Level1.success', compact("data"));
-    }
-
-    public function generateCode()
-    {
-
-
     }
 }

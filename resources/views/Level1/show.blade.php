@@ -49,24 +49,28 @@
     </style>
 </head>
 <body>
-<form method="post" action="{{url('level1/submit')}}">
+
     <div style="margin: auto;width: 900px">
         <table class="gridtable">
             <tr>
                 <th>题目</th>
+                <th>你的答案</th>
                 <th>答案</th>
+                <th>正确</th>
                 <th>题目</th>
+                <th>你的答案</th>
                 <th>答案</th>
+                <th>正确</th>
             </tr>
-            @if(!empty($list))
-                @foreach($list as $item)
+            @if(!empty($arr))
+                @foreach($arr as $item)
                     <tr>
                         @foreach($item as $value)
 
                             <td>{{$value['key_str']}}</td>
-                            <td><input type="text" autocomplete="off" name="val_{{$value['key_str']}}"
-                                       value=""
-                                       class="answer-input"><input type="hidden" name="hi_{{$value['key_str']}}" value="{{$value['val']}}"></td>
+                            <td><label>{{$value['enter_val']}}</label></td>
+                            <td><label>{{$value['val']}}</label></td>
+                            <td>@if($value['enter_val']==$value['val'])是@else<font color="red">否</font>@endif</td>
 
                         @endforeach
                     </tr>
@@ -75,10 +79,7 @@
 
         </table>
     </div>
-    <div style="margin:20px auto;width: 400px;text-align: center">
-        <input type="hidden" name="_token" value="{{ csrf_token() }}">
-        <input type="submit" value="提交" style="font-size: 18px;font-weight: bold;width: 160px">
-    </div>
-</form>
+
+
 </body>
 </html>
