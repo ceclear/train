@@ -14,5 +14,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('404');
+});
+
+Route::group(['prefix' => 'level1'], function () {
+    Route::get('/', 'SchoolController@index');
+//    Route::get('gen', 'SchoolController@index');
+    Route::post('submit', 'SchoolController@submit');
+    Route::get('success', 'SchoolController@success');
 });
