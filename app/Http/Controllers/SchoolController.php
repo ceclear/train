@@ -11,7 +11,6 @@ namespace App\Http\Controllers;
 
 use App\Models\SubtractDetail;
 use Illuminate\Support\Facades\DB;
-use function PHPUnit\Framework\isEmpty;
 
 class SchoolController extends Controller
 {
