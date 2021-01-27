@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 class SchoolController extends Controller
 {
 
+    //首页
     public function index()
     {
         $max = request('max', 20);
